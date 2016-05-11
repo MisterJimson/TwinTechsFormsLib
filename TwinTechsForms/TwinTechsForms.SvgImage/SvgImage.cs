@@ -171,7 +171,7 @@ namespace TwinTechs
 	    /// Optional Color, will color at runtime
 	    /// </summary>
 	    public static readonly BindableProperty TintColorProperty =
-	        BindableProperty.Create(nameof(TintColor), typeof(Xamarin.Forms.Color), typeof(SvgImage));
+	        BindableProperty.Create(nameof(TintColor), typeof(Xamarin.Forms.Color), typeof(SvgImage), Xamarin.Forms.Color.Default);
 
         /// <summary>
         /// Optional Color, will color at runtime
