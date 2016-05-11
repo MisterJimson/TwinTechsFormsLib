@@ -1,4 +1,5 @@
 ﻿using System;
+using Android.Graphics;
 using Android.Runtime;
 using Android.Widget;
 using Xamarin.Forms;
@@ -6,7 +7,7 @@ using Xamarin.Forms.Platform.Android;
 using NGraphics;
 using TwinTechs;
 using TwinTechs.Droid;
-
+using Color = Xamarin.Forms.Color;
 using Size = NGraphics.Size;
 
 [assembly: ExportRenderer (typeof(SvgImage), typeof(SvgImageRenderer))]
@@ -43,8 +44,17 @@ namespace TwinTechs.Droid
 				var outputSize = new Size (canvas.Width, canvas.Height);
 				var finalCanvas = _formsControl.RenderSvgToCanvas (outputSize, ScreenScale, CreatePlatformImageCanvas);
 				var image = (BitmapImage)finalCanvas.GetImage ();
+			    var bitmap = image.Bitmap;
+			    if (_formsControl.TintColor != Color.Default)
+			    {
+			        Paint paint = new Paint();
+			        ColorFilter filter = new PorterDuffColorFilter(_formsControl.TintColor.ToAndroid(), PorterDuff.Mode.SrcIn);
+			        paint.SetColorFilter(filter);
+			        Canvas imageCanvas = new Canvas(bitmap);
+                    imageCanvas.DrawBitmap(bitmap, 0, 0, paint);
+			    }
 
-				Control.SetImageBitmap (image.Bitmap);
+			    Control.SetImageBitmap (bitmap);
 			}
 		}
 

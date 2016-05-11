@@ -167,7 +167,25 @@ namespace TwinTechs
 			}
 		}
 
-		public void Invalidate ()
+	    /// <summary>
+	    /// Optional Color, will color at runtime
+	    /// </summary>
+	    public static readonly BindableProperty TintColorProperty =
+	        BindableProperty.Create(nameof(TintColor), typeof(Xamarin.Forms.Color), typeof(SvgImage));
+
+        /// <summary>
+        /// Optional Color, will color at runtime
+        /// </summary>
+        public Xamarin.Forms.Color TintColor
+        {
+            get { return (Xamarin.Forms.Color)GetValue(TintColorProperty); }
+            set
+            {
+                SetValue(TintColorProperty, value);
+            }
+        }
+
+        public void Invalidate ()
 		{
 			OnInvalidate?.Invoke (this, EventArgs.Empty);
 		}

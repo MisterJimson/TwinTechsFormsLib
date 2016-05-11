@@ -7,7 +7,7 @@ using Xamarin.Forms.Platform.iOS;
 using NGraphics;
 using TwinTechs;
 using TwinTechs.iOS;
-
+using Color = Xamarin.Forms.Color;
 using Size = NGraphics.Size;
 
 [assembly: ExportRenderer (typeof(SvgImage), typeof(SvgImageRenderer))]
@@ -48,6 +48,8 @@ namespace TwinTechs.iOS
 					var image = finalCanvas.GetImage ();
 					var uiImage = image.GetUIImage ();
 					Control.Image = uiImage;
+				    if (_formsControl.TintColor != Color.Default)
+                        Control.TintColor = _formsControl.TintColor.ToUIColor();
 				}
 			}
 		}
