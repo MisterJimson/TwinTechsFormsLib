@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Android.Graphics;
 using Android.Runtime;
 using Android.Widget;
@@ -7,6 +9,7 @@ using Xamarin.Forms.Platform.Android;
 using NGraphics;
 using TwinTechs;
 using TwinTechs.Droid;
+using TwinTechsForms.SvgImage.Droid;
 using Color = Xamarin.Forms.Color;
 using Size = NGraphics.Size;
 
@@ -16,15 +19,20 @@ namespace TwinTechs.Droid
 	[Preserve (AllMembers = true)]
 	public class SvgImageRenderer : ViewRenderer<SvgImage, ImageView>
 	{
-		public new static void Init ()
+	    private Paint paint;
+	    private static List<SavedBitmap> savedBitmaps = new List<SavedBitmap>();
+
+        public new static void Init ()
 		{
 			var temp = DateTime.Now;
 		}
 
 		public SvgImageRenderer ()
 		{
-			// Offer to do our own drawing so Android will actually call `Draw`.
-			SetWillNotDraw (willNotDraw: false);
+            paint = new Paint();
+
+            // Offer to do our own drawing so Android will actually call `Draw`.
+            SetWillNotDraw (willNotDraw: false);
 		}
 
 		private SvgImage _formsControl {
@@ -39,23 +47,43 @@ namespace TwinTechs.Droid
 		public override void Draw (Android.Graphics.Canvas canvas)
 		{
 			base.Draw (canvas);
+		    if (_formsControl == null) return;
 
-			if (_formsControl != null) {
-				var outputSize = new Size (canvas.Width, canvas.Height);
-				var finalCanvas = _formsControl.RenderSvgToCanvas (outputSize, ScreenScale, CreatePlatformImageCanvas);
-				var image = (BitmapImage)finalCanvas.GetImage ();
-			    var bitmap = image.Bitmap;
-			    if (_formsControl.TintColor != Color.Default)
-			    {
-			        Paint paint = new Paint();
-			        ColorFilter filter = new PorterDuffColorFilter(_formsControl.TintColor.ToAndroid(), PorterDuff.Mode.SrcIn);
-			        paint.SetColorFilter(filter);
-			        Canvas imageCanvas = new Canvas(bitmap);
-                    imageCanvas.DrawBitmap(bitmap, 0, 0, paint);
-			    }
+		    var savedBitmap = savedBitmaps.FirstOrDefault(x => x.SvgPath == _formsControl.SvgPath &&
+		                                                       x.HeightRequest.Equals(_formsControl.HeightRequest) &&
+		                                                       x.WidthRequest.Equals(_formsControl.WidthRequest) &&
+		                                                       x.TintColor == _formsControl.TintColor);
+		    Bitmap bitmap = null;
+		    if (savedBitmap != null)
+		    {
+		        bitmap = savedBitmap.Bitmap;
+		    }
+		    else
+		    {
+		        var outputSize = new Size(canvas.Width, canvas.Height);
+		        var finalCanvas = _formsControl.RenderSvgToCanvas(outputSize, ScreenScale, CreatePlatformImageCanvas);
+		        var image = (BitmapImage) finalCanvas.GetImage();
+		        bitmap = image.Bitmap;
 
-			    Control.SetImageBitmap (bitmap);
-			}
+		        if (_formsControl.TintColor != Color.Default)
+		        {
+		            var filter = new PorterDuffColorFilter(_formsControl.TintColor.ToAndroid(), PorterDuff.Mode.SrcIn);
+		            paint.SetColorFilter(filter);
+		            Canvas colorCanvas = new Canvas(bitmap);
+                    colorCanvas.DrawBitmap(bitmap, 0, 0, paint);
+
+                    savedBitmaps.Add(new SavedBitmap()
+                    {
+                        SvgPath = _formsControl.SvgPath,
+                        HeightRequest = _formsControl.HeightRequest,
+                        WidthRequest = _formsControl.WidthRequest,
+                        TintColor = _formsControl.TintColor,
+                        Bitmap = bitmap
+                    });
+		        }
+		    }
+
+		    Control.SetImageBitmap(bitmap);
 		}
 
 		protected override void OnElementChanged (ElementChangedEventArgs<SvgImage> e)

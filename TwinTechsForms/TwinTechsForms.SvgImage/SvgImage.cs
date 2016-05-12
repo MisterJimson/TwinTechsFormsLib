@@ -190,14 +190,6 @@ namespace TwinTechs
 			OnInvalidate?.Invoke (this, EventArgs.Empty);
 		}
 
-		protected override void OnBindingContextChanged ()
-		{
-			base.OnBindingContextChanged ();
-
-			LoadSvgFromResource ();
-			Invalidate ();
-		}
-
 		protected override void OnPropertyChanged (string propertyName = null)
 		{
 			base.OnPropertyChanged (propertyName);
